@@ -1,36 +1,41 @@
-# Elixir Enigma Machine Simulator
-# August 2016
-
-# Mike Boone
-# https://github.com/boone
-# https://twitter.com/boonedocks
-
-# Trying to learn Elixir by modeling an Enigma machine, inspired by the Ruby
-# code written by @albert_still in:
-# http://red-badger.com/blog/2015/02/23/understanding-the-enigma-machine-with-30-lines-of-ruby-star-of-the-2014-film-the-imitation-game
-
-# Encrypt/decrypt a message with:
-#   Enigma.process_string("SECRETMESSAGE")
-
-# To decrypt an encrypted message, supply the encrypted message and the
-# matching plugboard, rotor, and reflector configurations:
-#   Enigma.process_string("LDINKZRVIDGPO", 'YXSDPFLHVQKGOUMEJRCTNIZBAW',
-#     'FKDRHSXGVYNBLZIWMEJQOACUTP', 'XTQFWNBCKYVSZODMJIHPGERAUL',
-#     'MZEVUBYCLKHOSIWQNADGFTRPXJ', 'OQFGUCDPZKJVXWAHBTYRELNMSI')
-
 defmodule Enigma do
+  @moduledoc """
+    Elixir Enigma Machine Simulator
+    August 2016
+
+    Mike Boone
+    https://github.com/boone
+    https://twitter.com/boonedocks
+
+    Trying to learn Elixir by modeling an Enigma machine, inspired by the Ruby
+    code written by @albert_still in:
+    http://red-badger.com/blog/2015/02/23/understanding-the-enigma-machine-with-30-lines-of-ruby-star-of-the-2014-film-the-imitation-game
+
+    Encrypt/decrypt a message with:
+      Enigma.process_string("SECRETMESSAGE")
+
+    To decrypt an encrypted message, supply the encrypted message and the
+    matching plugboard, rotor, and reflector configurations:
+      Enigma.process_string("LDINKZRVIDGPO", 'YXSDPFLHVQKGOUMEJRCTNIZBAW',
+        'FKDRHSXGVYNBLZIWMEJQOACUTP', 'XTQFWNBCKYVSZODMJIHPGERAUL',
+        'MZEVUBYCLKHOSIWQNADGFTRPXJ', 'OQFGUCDPZKJVXWAHBTYRELNMSI')
+  """
   @ascii_offset 65
 
+  @doc """
+    Return a randomized rotor: a random list of chars from A-Z.
+  """
   def random_rotor do
-    # Return a randomized rotor: a random list of chars from A-Z.
     Enum.take_random(?A..?Z, 26)
   end
 
+  @doc """
+    Get a random A-Z character list and break it into pairs.
+    For each pair, the first letter will map to the second and vice versa.
+    Create a character list similar to the rotors which represents this
+    reflected pair relationship.
+  """
   def random_reflector do
-    # Get a random A-Z character list and break it into pairs.
-    # For each pair, the first letter will map to the second and vice versa.
-    # Create a character list similar to the rotors which represents this
-    # reflected pair relationship.
     random_pairs = Enum.chunk(Enum.take_random(?A..?Z, 26), 2)
 
     # Start with a blank list with 26 empty slots, which we need to fill with
@@ -40,9 +45,11 @@ defmodule Enigma do
     |> reflector_iterate(random_pairs)
   end
 
+  @doc """
+    The plugboard is like a reflector, but only 10 letters are swapped.
+    The remaining letters map to themselves.
+  """
   def random_plugboard do
-    # The plugboard is like a reflector, but only 10 letters are swapped.
-    # The remaining letters map to themselves.
     random_pairs =
       Enum.chunk(Enum.take_random(?A..?Z, 26), 2)
       # Keep 10 pairs, throw away 6
@@ -98,11 +105,11 @@ defmodule Enigma do
 
   defp iterate([head | tail], plugboard, rotor1, rotor2, rotor3, reflector, count, newlist) do
     # Spin Rotor 1
-    rotor1 = tick_rotor(rotor1)
+    rotor1 = spin_rotor(rotor1)
     # Spin Rotor 2 if Rotor 1 has gone all the way around.
-    rotor2 = rotor2 |> tickif(count, 25)
+    rotor2 = rotor2 |> spin_rotor(count, 25)
     # Spin Rotor 3 if Rotor 2 has gone all the way around.
-    rotor3 = rotor3 |> tickif(count, 25 * 25)
+    rotor3 = rotor3 |> spin_rotor(count, 25 * 25)
 
     translated_char =
       head
@@ -133,22 +140,18 @@ defmodule Enigma do
   # position in the character list. Hence we need functions that will find the
   # translation for 'A' from the list, and vice versa.
 
-  # take the char and find the corresponding translated char in the list
+  @doc """
+    take the char and find the corresponding translated char in the list
+  """
   defp send_through(char, list) do
     Enum.at(list, char - @ascii_offset)
   end
 
-  # take the translated char and find the corresponding original char
+  @doc """
+    take the translated char and find the corresponding original char
+  """
   defp send_back_through(char, list) do
     Enum.find_index(list, fn x -> x == char end) + @ascii_offset
-  end
-
-  defp tickif(rotor, count, condition) when rem(count, condition) == 0 do
-    tick_rotor(rotor)
-  end
-
-  defp tickif(rotor, _, _) do
-    rotor
   end
 
   defp reflector_iterate(reflector, [head | tail]) do
@@ -167,8 +170,18 @@ defmodule Enigma do
     reflector
   end
 
-  defp tick_rotor([head | tail]) do
-    # Spin the rotor to the next position.
+  @doc """
+    Spin the rotor to the next position.
+  """
+  defp spin_rotor([head | tail]) do
     tail ++ [head]
+  end
+
+  defp spin_rotor(rotor, count, condition) when rem(count, condition) == 0 do
+    spin_rotor(rotor)
+  end
+
+  defp spin_rotor(rotor, _, _) do
+    rotor
   end
 end
