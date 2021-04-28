@@ -19,7 +19,6 @@
 #     'MZEVUBYCLKHOSIWQNADGFTRPXJ', 'OQFGUCDPZKJVXWAHBTYRELNMSI')
 
 defmodule Enigma do
-  
   @ascii_offset 65
 
   def rotor do
