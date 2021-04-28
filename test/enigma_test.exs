@@ -1,60 +1,63 @@
 defmodule EnigmaTest do
-  use ExUnit.Case
-  doctest Enigma
+  use ExUnit.Case, async: true
 
-  test "rotor" do
-    assert Regex.match?(~r/\A[A-Z]{26}\z/, to_string(Enigma.rotor()))
+  describe "random init" do
+    test "rotor" do
+      assert Regex.match?(~r/\A[A-Z]{26}\z/, to_string(Enigma.random_rotor()))
+    end
+
+    test "reflector" do
+      assert Regex.match?(~r/\A[A-Z]{26}\z/, to_string(Enigma.random_reflector()))
+    end
+
+    test "plugboard" do
+      assert Regex.match?(~r/\A[A-Z]{26}\z/, to_string(Enigma.random_plugboard()))
+    end
   end
 
-  test "reflector" do
-    assert Regex.match?(~r/\A[A-Z]{26}\z/, to_string(Enigma.reflector()))
-  end
+  describe "cypher/decypher" do
+    test "process_string" do
+      # use known rotors, reflector, and plugboard, and ensure the message is
+      # properly encrypted/ecrypted
+      rotor1 = 'YXSDPFLHVQKGOUMEJRCTNIZBAW'
+      rotor2 = 'FKDRHSXGVYNBLZIWMEJQOACUTP'
+      rotor3 = 'XTQFWNBCKYVSZODMJIHPGERAUL'
+      reflector = 'MZEVUBYCLKHOSIWQNADGFTRPXJ'
+      plugboard = 'OQFGUCDPZKJVXWAHBTYRELNMSI'
 
-  test "plugboard" do
-    assert Regex.match?(~r/\A[A-Z]{26}\z/, to_string(Enigma.plugboard()))
-  end
+      cleartext_string = "SECRETMESSAGE"
 
-  test "process_string" do
-    # use known rotors, reflector, and plugboard, and ensure the message is
-    # properly encrypted/ecrypted
-    rotor1 = 'YXSDPFLHVQKGOUMEJRCTNIZBAW'
-    rotor2 = 'FKDRHSXGVYNBLZIWMEJQOACUTP'
-    rotor3 = 'XTQFWNBCKYVSZODMJIHPGERAUL'
-    reflector = 'MZEVUBYCLKHOSIWQNADGFTRPXJ'
-    plugboard = 'OQFGUCDPZKJVXWAHBTYRELNMSI'
+      encrypted_string =
+        Enigma.process_string(cleartext_string, rotor1, rotor2, rotor3, reflector, plugboard)
 
-    cleartext_string = "SECRETMESSAGE"
+      assert encrypted_string == "LDINKZRVIDGPO"
 
-    encrypted_string =
-      Enigma.process_string(cleartext_string, rotor1, rotor2, rotor3, reflector, plugboard)
+      decrypted_string =
+        Enigma.process_string(encrypted_string, rotor1, rotor2, rotor3, reflector, plugboard)
 
-    assert encrypted_string == "LDINKZRVIDGPO"
+      assert decrypted_string == cleartext_string
+    end
 
-    decrypted_string =
-      Enigma.process_string(encrypted_string, rotor1, rotor2, rotor3, reflector, plugboard)
+    test "it should not encrypt the same char twice with the same letter" do
+      # use known rotors, reflector, and plugboard, and ensure the message is
+      # properly encrypted/ecrypted
+      rotor1 = 'YXSDPFLHVQKGOUMEJRCTNIZBAW'
+      rotor2 = 'FKDRHSXGVYNBLZIWMEJQOACUTP'
+      rotor3 = 'XTQFWNBCKYVSZODMJIHPGERAUL'
+      reflector = 'MZEVUBYCLKHOSIWQNADGFTRPXJ'
+      plugboard = 'OQFGUCDPZKJVXWAHBTYRELNMSI'
 
-    assert decrypted_string == cleartext_string
-  end
+      cleartext_string = "AAA"
 
-  test "it should not encrypt the same char twice with the same letter" do
-    # use known rotors, reflector, and plugboard, and ensure the message is
-    # properly encrypted/ecrypted
-    rotor1 = 'YXSDPFLHVQKGOUMEJRCTNIZBAW'
-    rotor2 = 'FKDRHSXGVYNBLZIWMEJQOACUTP'
-    rotor3 = 'XTQFWNBCKYVSZODMJIHPGERAUL'
-    reflector = 'MZEVUBYCLKHOSIWQNADGFTRPXJ'
-    plugboard = 'OQFGUCDPZKJVXWAHBTYRELNMSI'
+      encrypted_string =
+        Enigma.process_string(cleartext_string, rotor1, rotor2, rotor3, reflector, plugboard)
 
-    cleartext_string = "AAA"
+      assert encrypted_string == "XVF"
 
-    encrypted_string =
-      Enigma.process_string(cleartext_string, rotor1, rotor2, rotor3, reflector, plugboard)
+      decrypted_string =
+        Enigma.process_string(encrypted_string, rotor1, rotor2, rotor3, reflector, plugboard)
 
-    assert encrypted_string == "XVF"
-
-    decrypted_string =
-      Enigma.process_string(encrypted_string, rotor1, rotor2, rotor3, reflector, plugboard)
-
-    assert decrypted_string == cleartext_string
+      assert decrypted_string == cleartext_string
+    end
   end
 end

@@ -21,12 +21,12 @@
 defmodule Enigma do
   @ascii_offset 65
 
-  def rotor do
+  def random_rotor do
     # Return a randomized rotor: a random list of chars from A-Z.
     Enum.take_random(?A..?Z, 26)
   end
 
-  def reflector do
+  def random_reflector do
     # Get a random A-Z character list and break it into pairs.
     # For each pair, the first letter will map to the second and vice versa.
     # Create a character list similar to the rotors which represents this
@@ -40,7 +40,7 @@ defmodule Enigma do
     |> reflector_iterate(random_pairs)
   end
 
-  def plugboard do
+  def random_plugboard do
     # The plugboard is like a reflector, but only 10 letters are swapped.
     # The remaining letters map to themselves.
     random_pairs =
@@ -56,11 +56,11 @@ defmodule Enigma do
 
   def process_string(
         input_str,
-        plugboard \\ plugboard(),
-        rotor1 \\ rotor(),
-        rotor2 \\ rotor(),
-        rotor3 \\ rotor(),
-        reflector \\ reflector()
+        plugboard \\ random_plugboard(),
+        rotor1 \\ random_rotor(),
+        rotor2 \\ random_rotor(),
+        rotor3 \\ random_rotor(),
+        reflector \\ random_reflector()
       ) do
     # We accept any string as input, but we really want a charlist of only
     # A-Z characters, no spacing or punctuation.
