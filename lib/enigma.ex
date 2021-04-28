@@ -36,7 +36,7 @@ defmodule Enigma do
     reflected pair relationship.
   """
   def random_reflector do
-    random_pairs = Enum.chunk(Enum.take_random(?A..?Z, 26), 2)
+    random_pairs = Enum.chunk_every(Enum.take_random(?A..?Z, 26), 2)
 
     # Start with a blank list with 26 empty slots, which we need to fill with
     # the pairs.
@@ -51,7 +51,7 @@ defmodule Enigma do
   """
   def random_plugboard do
     random_pairs =
-      Enum.chunk(Enum.take_random(?A..?Z, 26), 2)
+      Enum.chunk_every(Enum.take_random(?A..?Z, 26), 2)
       # Keep 10 pairs, throw away 6
       |> Enum.take(10)
 

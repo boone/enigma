@@ -5,7 +5,7 @@ defmodule Enigma.Mixfile do
     [
       app: :enigma,
       version: "0.1.0",
-      elixir: "~> 1.3",
+      elixir: "~> 1.5",
       deps: deps()
     ]
   end
